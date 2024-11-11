@@ -1,69 +1,22 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Elements/Button";
 import { CardProduct } from "../components/Fragments/CardProduct";
 import { useEffect, useRef, useState } from "react";
-
-const products = [
-  {
-    id: 1,
-    image: "/images/shoes.jpg",
-    title: "Sepatu Adidas",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus eum, aliquid vero necessitatibus asperiores excepturi odio minima architecto ut quis provident ab, suscipit, eius pariatur? Eligendi porro deserunt accusamus esse.",
-    price: 1000000,
-  },
-  {
-    id: 2,
-    image: "/images/shoes.jpg",
-    title: "Sepatu Newcastle",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus eum, aliquid vero necessitatibus asperiores excepturi odio minima architecto ut quis provident ab, suscipit, eius pariatur? Eligendi porro deserunt accusamus esse.",
-    price: 999000,
-  },
-  {
-    id: 3,
-    image: "/images/shoes.jpg",
-    title: "Sepatu Industrial",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus eum, aliquid vero necessitatibus asperiores excepturi odio minima architecto ut quis provident ab, suscipit, eius pariatur? Eligendi porro deserunt accusamus esse.",
-    price: 975000,
-  },
-  {
-    id: 4,
-    image: "/images/shoes.jpg",
-    title: "Sepatu Jaman Factory",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus eum, aliquid vero necessitatibus asperiores excepturi odio minima architecto ut quis provident ab, suscipit, eius pariatur? Eligendi porro deserunt accusamus esse.",
-    price: 1000000,
-  },
-  {
-    id: 5,
-    image: "/images/shoes.jpg",
-    title: "Sepatu Gen Z",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus eum, aliquid vero necessitatibus asperiores excepturi odio minima architecto ut quis provident ab, suscipit, eius pariatur? Eligendi porro deserunt accusamus esse.",
-    price: 1500000,
-  },
-  {
-    id: 6,
-    image: "/images/shoes.jpg",
-    title: "Sepatu Konglomerat",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus eum, aliquid vero necessitatibus asperiores excepturi odio minima architecto ut quis provident ab, suscipit, eius.",
-    price: 4800000,
-  },
-];
+import { getProducts } from "../services/product.service";
+import { useLogin } from "../hooks/useLogin";
 
 export const ProductPage = () => {
   const [cart, setCart] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [products, setProducts] = useState([]);
+
+  const username = useLogin();
 
   const navigate = useNavigate();
-  const email = localStorage.getItem("email");
 
   const handleLogout = () => {
-    localStorage.removeItem("email");
     localStorage.removeItem("password");
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
@@ -101,13 +54,18 @@ export const ProductPage = () => {
   }, []);
 
   useEffect(() => {
-    if (cart.length > 0 || totalPrice > 0) {
+    getProducts((data) => {
+      setProducts(data);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (products.length > 0 || cart.length > 0 || totalPrice > 0) {
       localStorage.setItem("cart", JSON.stringify(cart));
       localStorage.setItem("totalPrice", JSON.stringify(totalPrice));
     }
   }, [cart, totalPrice]);
 
-  //   menggunakan useRef
   const cartRef = useRef(JSON.parse(localStorage.getItem("cart")) || []);
 
   const handleAddToCartRef = (id) => {
@@ -128,7 +86,7 @@ export const ProductPage = () => {
   return (
     <>
       <div className="flex justify-end h-10 bg-blue-500 text-white items-center px-5 py-10 gap-5">
-        {email}
+        <Link to={"/profile"}>{username}</Link>
         <Button
           className="hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200"
           classname="bg-red-500 hover:bg-blue-800 text-white"
@@ -140,19 +98,20 @@ export const ProductPage = () => {
       </div>
       <div className="flex flex-col md:flex-row md:justify-between w-full flex-wrap px-5 justify-center min-h-screen items-start py-5 gap-5">
         <div className="w-3/5 flex flex-wrap gap-2">
-          {products.map((product) => (
-            <CardProduct key={product.id}>
-              <CardProduct.Header image={product.image} />
-              <CardProduct.Body title={product.title}>
-                {product.description}
-              </CardProduct.Body>
-              <CardProduct.Footer
-                price={product.price}
-                id={product.id}
-                handleAddToCart={handleAddToCart}
-              />
-            </CardProduct>
-          ))}
+          {products.length > 0 &&
+            products.map((product) => (
+              <CardProduct key={product.id}>
+                <CardProduct.Header image={product.image} id={product.id} />
+                <CardProduct.Body title={product.title} id={product.id}>
+                  {product.description}
+                </CardProduct.Body>
+                <CardProduct.Footer
+                  price={product.price}
+                  id={product.id}
+                  handleAddToCart={handleAddToCart}
+                />
+              </CardProduct>
+            ))}
         </div>
         <div className="w-1/3 flex flex-col items-start justify-start">
           <h1 className="text-3xl font-bold text-blue-600 mb-2">Cart</h1>
@@ -166,31 +125,39 @@ export const ProductPage = () => {
               </tr>
             </thead>
             <tbody>
-              {cart.map((item) => {
-                const product = products.find(
-                  (product) => product.id === item.id
-                );
-                return (
-                  <tr key={item.id} className="hover:bg-gray-100">
-                    <td className="px-4 py-2 border-b">{product.title}</td>
-                    <td className="px-4 py-2 border-b">{item.quantity}</td>
-                    <td className="px-4 py-2 border-b">
-                      {new Intl.NumberFormat("id-ID", {
-                        style: "currency",
-                        currency: "IDR",
-                        minimumFractionDigits: 0,
-                      }).format(product.price)}
-                    </td>
-                    <td className="px-4 py-2 border-b">
-                      {new Intl.NumberFormat("id-ID", {
-                        style: "currency",
-                        currency: "IDR",
-                        minimumFractionDigits: 0,
-                      }).format(product.price * item.quantity)}
-                    </td>
-                  </tr>
-                );
-              })}
+              {products.length > 0 &&
+                cart.map((item) => {
+                  const product = products.find(
+                    (product) => product.id === item.id
+                  );
+                  return (
+                    <tr key={item.id} className="hover:bg-gray-100">
+                      <td className="px-4 py-2 border-b">
+                        {product.title.substring(0, 10)}
+                      </td>
+                      <td className="px-4 py-2 border-b">{item.quantity}</td>
+                      <td className="px-4 py-2 border-b">
+                        {new Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                          minimumFractionDigits: 0,
+                          currencyDisplay: "symbol",
+                        }).format(product.price)}
+                      </td>
+                      <td className="px-4 py-2 border-b">
+                        {new Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                          minimumFractionDigits: 1,
+                          currencyDisplay: "symbol",
+                          useGrouping: true,
+                        })
+                          .format(product.price * item.quantity)
+                          .replace("$", "$ ")}
+                      </td>
+                    </tr>
+                  );
+                })}
               <tr
                 ref={totalPriceRef}
                 className="text-left bg-blue-100 text-gray-600"
@@ -203,7 +170,11 @@ export const ProductPage = () => {
                     style: "currency",
                     currency: "IDR",
                     minimumFractionDigits: 0,
-                  }).format(totalPrice)}
+                    currencyDisplay: "symbol",
+                    useGrouping: true,
+                  })
+                    .format(totalPrice)
+                    .replace("$", "$ ")}
                 </td>
               </tr>
             </tbody>

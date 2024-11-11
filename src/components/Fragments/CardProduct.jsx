@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "../Elements/Button";
 
 export const CardProduct = (props) => {
@@ -10,32 +11,32 @@ export const CardProduct = (props) => {
 };
 
 const Header = (props) => {
-  const { image } = props;
+  const { image, id } = props;
   return (
-    <a href="#">
+    <Link to={`/product/${id}`}>
       <img
         src={image}
         alt="product"
         className="p-6 rounded-t-lg object-cover h-48 w-full"
       />
-    </a>
+    </Link>
   );
 };
 
 const Body = (props) => {
-  const { children, title } = props;
+  const { children, title, id } = props;
 
   const truncateText = (text, maxLength) => {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
   };
   return (
     <div className="px-5 pb-5 h-full">
-      <a href="#">
+      <Link to={`/product/${id}`}>
         <h5 className="text-2xl font-semibold tracking-tight text-white mb-2">
-          {title}
+          {title.substring(0, 20)}...
         </h5>
         <p className="text-s text-gray-300">{truncateText(children, 100)}</p>
-      </a>
+      </Link>
     </div>
   );
 };
@@ -45,12 +46,15 @@ const Footer = (props) => {
   return (
     <div className="flex items-center justify-between px-5 pb-5">
       <span className="text-lg font-semibold text-blue-400">
-        {new Intl.NumberFormat("id-ID", {
+        {new Intl.NumberFormat("en-US", {
           style: "currency",
-          currency: "IDR",
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        }).format(price)}
+          currency: "USD",
+          minimumFractionDigits: 1,
+          currencyDisplay: "symbol",
+          useGrouping: true,
+        })
+          .format(price)
+          .replace("$", "$ ")}
       </span>
       <Button
         className="text-white px-4 py-2 rounded-md transition-colors duration-200"

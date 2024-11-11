@@ -8,7 +8,7 @@ export const Button = (props) => {
   return (
     <div>
       <button
-        className={`h-10 px-6 font-semibold rounded-md ${classname} text-white`}
+        className={`h-10 px-6 font-semibold rounded-md ${classname} text-white w-full`}
         type={type}
         onClick={actionHandler}
       >

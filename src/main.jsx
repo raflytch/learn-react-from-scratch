@@ -8,11 +8,19 @@ import { ErrorPage } from "./pages/404";
 import { ProductPage } from "./pages/products";
 import { ProfilePage } from "./pages/profile";
 import { DetailProductPage } from "./pages/detailProductPage";
+import { Provider } from "react-redux";
+import store from "./redux/store";
+import Navbar from "./components/Layouts/Navbar";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <div>Hello World</div>,
+    element: (
+      <>
+        <Navbar />
+        <div>Hello World</div>
+      </>
+    ),
     errorElement: <ErrorPage />,
   },
   {
@@ -25,20 +33,37 @@ const router = createBrowserRouter([
   },
   {
     path: "/products",
-    element: <ProductPage />,
+    element: (
+      <>
+        <Navbar />
+        <ProductPage />
+      </>
+    ),
   },
   {
     path: "/profile",
-    element: <ProfilePage />,
+    element: (
+      <>
+        <Navbar />
+        <ProfilePage />
+      </>
+    ),
   },
   {
     path: "/product/:id",
-    element: <DetailProductPage />,
+    element: (
+      <>
+        <Navbar />
+        <DetailProductPage />
+      </>
+    ),
   },
 ]);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
   </StrictMode>
 );

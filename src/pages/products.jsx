@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
 import { Button } from "../components/Elements/Button";
 import { CardProduct } from "../components/Fragments/CardProduct";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { getProducts } from "../services/product.service";
 import { useLogin } from "../hooks/useLogin";
 import TableCart from "../components/Fragments/TableCart";
+import { DarkModeContext } from "../context/DarkMode";
 
 export const ProductPage = () => {
   const [products, setProducts] = useState([]);
+  const { isDarkMode, setIsDarkMode } = useContext(DarkModeContext);
 
   useLogin();
 
@@ -19,7 +21,11 @@ export const ProductPage = () => {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row md:justify-between w-full flex-wrap px-5 justify-center min-h-screen items-start py-5 gap-5">
+      <div
+        className={`flex flex-col md:flex-row md:justify-between w-full flex-wrap px-5 justify-center min-h-screen items-start py-5 gap-5 ${
+          isDarkMode ? "bg-gray-900" : "bg-gray-100"
+        }`}
+      >
         <div className="w-3/5 flex flex-wrap gap-2">
           {products.length > 0 &&
             products.map((product) => (
